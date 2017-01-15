@@ -8,3 +8,7 @@ socket:mina
 数据库:spring+jdbcTemplate
 #通讯类
 https://github.com/momo145/TransportModule
+#客户端
+https://github.com/momo145/SmartStock
+#IDE
+ide我是使用 IntelliJ IDEA
