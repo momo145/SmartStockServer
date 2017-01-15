@@ -1,0 +1,68 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">  
+ <bean 
+        class="org.springframework.beans.factory.config.CustomEditorConfigurer"> 
+        <property name="customEditors"> 
+            <map> 
+                <entry key="java.net.SocketAddress"> 
+                    <bean 
+                        class="org.apache.mina.integration.beans.InetSocketAddressEditor" /> 
+                </entry> 
+            </map> 
+        </property> 
+    </bean> 
+    <!-- 设置端口1235--> 
+    <bean id="ioAcceptor" 
+        class="org.apache.mina.transport.socket.nio.NioSocketAcceptor" 
+        init-method="bind" destroy-method="unbind"> 
+        <property name="defaultLocalAddress" value=":1235" /> 
+        <property name="handler" ref="SampleHandler" /> 
+        <property name="filterChainBuilder" ref="filterChainBuilder" /> 
+        <property name="reuseAddress" value="true" /> 
+    </bean> 
+
+    <!--配置线程池  --> 
+    <bean id="splatexecutorFilter"    class="com.chenxinjian.smartstock.server.mina.SplatexecutorFilter">
+      <property name="DEFAULT_MAX_POOL_SIZE"><value>20</value></property>
+      <property name="BASE_THREAD_NUMBER"><value>0</value></property> 
+      <property name="DEFAULT_KEEPALIVE_TIME"><value>30</value></property>
+    </bean> 
+
+    <!--编码过滤器 --> 
+    <bean id="codecFilter" 
+        class="org.apache.mina.filter.codec.ProtocolCodecFilter"> 
+        <constructor-arg>
+				<bean class="org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory"></bean>
+			</constructor-arg>
+    </bean> 
+    <!--日志过滤器--> 
+    <bean id="loggingFilter"    class="com.chenxinjian.smartstock.server.mina.LoggerIoFilterAdapter" />
+    <!--数据解压缩，解密过滤器 
+    <bean id="formatFilter"    class="com.sinkinhan.BabyGoHomeServer.mina.DataFormatIoFilterAdapter" /> 
+     --> 
+    <!--业务入口  --> 
+    <bean id="SampleHandler" class="com.chenxinjian.smartstock.server.mina.ReceivedMessage" />
+
+    <bean id="filterChainBuilder" 
+        class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder"> 
+        <property name="filters"> 
+            <map> 
+                <entry key="executor" value-ref="splatexecutorFilter" /> 
+                <entry key="codecFilter" value-ref="codecFilter" /> 
+                <!--  
+                <entry key="formatFilter" value-ref="formatFilter" /> 
+                 <entry key="loggingFilter" value-ref="loggingFilter" /> 
+                -->
+               
+            </map> 
+        </property> 
+    </bean>
+</beans>
